@@ -33,6 +33,7 @@ SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
+#include <sys/stat.h>
 #include <errno.h>
 
 #include "HashCheck.h"
@@ -92,6 +93,8 @@ void print_version();
 
 args_t process_args(int num, char **arguments);
 
+int isDir(const char *path);
+
 /*---------------------------------------------------------------------------*/
 /* Main                                                                      */
 /*---------------------------------------------------------------------------*/
@@ -134,7 +137,13 @@ int main(int argc, char **argv){
     quiet_flag = 1;
   }
   if(arguments.check){
-    if((fp = fopen(argv[optind], "r")) == NULL){
+    fp = fopen(argv[optind], "r");
+
+    if(isDir(argv[optind])){
+      errno = EISDIR;
+    }
+
+    if((fp == NULL) || errno){
       printf("%s: %s: %s\n", argv[0], argv[optind], strerror(errno));
       if(msg != NULL){
         free(msg);
@@ -149,7 +158,13 @@ int main(int argc, char **argv){
         strcpy(mode, "r");
       }
 
-      if((fp = fopen(argv[optind+1], mode)) == NULL){
+      if(isDir(argv[optind+1])){
+        errno = EISDIR;
+      }
+
+      fp = fopen(argv[optind+1], mode);
+
+      if((fp == NULL) || errno){
         printf("%s: %s: %s\n", argv[0], argv[optind+1], strerror(errno));
         return -1;
       }
@@ -290,4 +305,12 @@ args_t process_args(int num, char **arguments){
     }
   }
   return result;
+}
+
+int isDir(const char *path){
+  struct stat statbuf;
+  if(stat(path, &statbuf) != 0){
+    return 0;
+  }
+  return S_ISDIR(statbuf.st_mode);
 }
