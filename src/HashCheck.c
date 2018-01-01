@@ -141,6 +141,7 @@ int main(int argc, char **argv){
 
     if(isDir(argv[optind])){
       errno = EISDIR;
+      fclose(fp);
     }
 
     if((fp == NULL) || errno){
@@ -158,11 +159,12 @@ int main(int argc, char **argv){
         strcpy(mode, "r");
       }
 
+      fp = fopen(argv[optind+1], mode);
+
       if(isDir(argv[optind+1])){
         errno = EISDIR;
+        fclose(fp);
       }
-
-      fp = fopen(argv[optind+1], mode);
 
       if((fp == NULL) || errno){
         printf("%s: %s: %s\n", argv[0], argv[optind+1], strerror(errno));
