@@ -193,7 +193,7 @@ int main(int argc, char **argv){
     }
   }
 
-  uint8_t digest[20] = {0};
+  uint8_t digest[32] = {0};
 
   if(!strcmp(argv[optind], "md5")){
     checksum_len = 16;
@@ -206,6 +206,15 @@ int main(int argc, char **argv){
   }else if(!strcmp(argv[optind], "sha1")){
     checksum_len = 20;
     if(sha1_sum(msg, file_len, digest)){
+      if(msg != NULL){
+        free(msg);
+      }
+      return -1;
+    }
+  }
+  else if(!strcmp(argv[optind], "sha256")){
+    checksum_len = 32;
+    if(sha256_sum(msg, file_len, digest)){
       if(msg != NULL){
         free(msg);
       }
@@ -246,6 +255,7 @@ void print_help(char *program_name){
     printf("Options:\n");
     printf("\tmd5                  Print or check MD5 (128-bit) checksums\n");
     printf("\tsha1                 Print or check SHA1 (160-bit) checksums\n");
+    printf("\tsha256               Print or check SHA256 (256-bit) checksums\n");
 }
 
 void print_version(){
