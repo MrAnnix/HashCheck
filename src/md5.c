@@ -7,7 +7,7 @@
 
   See also    HashCheck.h
 
-  Autor       Raúl San Martín Aniceto (https://github.com/MrAnnix)
+  Autor       Raúl San Martín Aniceto
 
   Copyright (c) 2018 Raúl San Martín Aniceto
 
