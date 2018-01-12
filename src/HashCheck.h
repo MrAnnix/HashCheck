@@ -124,6 +124,26 @@ int sha1_sum(uint8_t *initial_msg, size_t initial_len, uint8_t digest[20]);
 
 int sha256_sum(uint8_t *initial_msg, size_t initial_len, uint8_t digest[32]);
 
+/**sha512_sum*****************************************************************
+
+  Resume       Computes the sha512 checksum for a given message
+
+  Description  Computes the sha512 checksum for a given message. If an error
+              ocurs, it returns -1 and errno is set.
+
+  Parameters   -uint8_t *initial_msg: The initial message.
+               -size_t initial_len: The length of the initial_msg.
+               -uint8_t *sha1sum: The result of the sum as an array of uint8_t
+                                of lenght 64. 512 bits in total.
+
+  Colat. Effe. [obligatorio]
+
+  See also     [opcional]
+
+******************************************************************************/
+
+int sha512_sum(uint8_t *initial_msg, size_t initial_len, uint8_t digest[64]);
+
 /**Function*******************************************************************
 
   Resume       [obligatorio]
