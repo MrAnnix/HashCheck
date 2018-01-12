@@ -34,8 +34,7 @@ SOFTWARE.
 #include <stdlib.h>
 #include <stdint.h>
 
-#include <stdio.h>
-#include <inttypes.h>
+
 
 #include <stddef.h>
 #include <string.h>
@@ -70,6 +69,9 @@ SOFTWARE.
 #define LEFTROTATE(x, c) (((x) << (c)) | ((x) >> (32 - (c))))
 #define RIGHTROTATE(x,c) (((x) >> (c)) | ((x) << (32 - (c))))
 
+#define SHFL(x, n) (x << n)
+#define SHFR(x, n) (x >> n)
+
 #define LEFTROTATE64(x, c) (((x) << (c)) | ((x) >> (64 - (c))))
 #define RIGHTROTATE64(x,c) (((x) >> (c)) | ((x) << (64 - (c))))
 
@@ -78,15 +80,15 @@ SOFTWARE.
 
 #define EP0(x) (RIGHTROTATE(x, 2) ^ RIGHTROTATE(x,13) ^ RIGHTROTATE(x,22))
 #define EP1(x) (RIGHTROTATE(x, 6) ^ RIGHTROTATE(x,11) ^ RIGHTROTATE(x,25))
-#define SIG0(x) (RIGHTROTATE(x, 7) ^ RIGHTROTATE(x,18) ^ ((x) >>  3))
-#define SIG1(x) (RIGHTROTATE(x,17) ^ RIGHTROTATE(x,19) ^ ((x) >> 10))
+#define SIG0(x) (RIGHTROTATE(x, 7) ^ RIGHTROTATE(x,18) ^ SHFR(x,3))
+#define SIG1(x) (RIGHTROTATE(x,17) ^ RIGHTROTATE(x,19) ^ SHFR(x,10))
 
 #define EP0_512(x) (RIGHTROTATE64(x, 28) ^ RIGHTROTATE64(x,34)\
             ^ RIGHTROTATE64(x, 39))
 #define EP1_512(x) (RIGHTROTATE64(x, 14) ^ RIGHTROTATE64(x,18)\
             ^ RIGHTROTATE64(x, 41))
-#define SIG0_512(x) (RIGHTROTATE64(x, 1) ^ RIGHTROTATE64(x, 8) ^ ((x) >> 7))
-#define SIG1_512(x) (RIGHTROTATE64(x,19) ^ RIGHTROTATE64(x,61) ^ ((x) >> 6))
+#define SIG0_512(x) (RIGHTROTATE64(x, 1) ^ RIGHTROTATE64(x, 8) ^ SHFR(x,7))
+#define SIG1_512(x) (RIGHTROTATE64(x,19) ^ RIGHTROTATE64(x,61) ^ SHFR(x,6))
 
 /*---------------------------------------------------------------------------*/
 /* Static function prototypes                                                */
@@ -325,7 +327,7 @@ int sha512_sum(uint8_t *initial_msg, size_t initial_len, uint8_t *digest){
 
     //Extend the sixteen 64-bit words into eighty 64-bit words:
     for(i = 16 ; i< 80; i++){
-      w[i] = SIG1_512(w[i - 2]) + w[i - 7] + SIG0_512(w[i - 15] + w[i - 16]);
+      w[i] = SIG1_512(w[i - 2]) + w[i - 7] + SIG0_512(w[i - 15]) + w[i - 16];
     }
 
     // Initialize hash value for this chunk:
@@ -339,7 +341,6 @@ int sha512_sum(uint8_t *initial_msg, size_t initial_len, uint8_t *digest){
     uint64_t h = h7;
 
     //Main loop:
-    printf("\n              A/E              B/F              C/G              D/H \n");
     for(i = 0; i < 80; i++){
       t1 = h + EP1_512(e) + CH(e,f,g) + k[i] + w[i];
 		  t2 = EP0_512(a) + MAJ(a, b, c);
@@ -350,10 +351,7 @@ int sha512_sum(uint8_t *initial_msg, size_t initial_len, uint8_t *digest){
 		  d = c;
 		  c = b;
 		  b = a;
-		  a = t1 + t2;
-
-      printf("t = %2u: %016lX %016lX %016lX %016lX \n", i, a, b, c, d);
-      printf("        %016lX %016lX %016lX %016lX \n\n", e, f, g, h);
+      a = t1 + t2;
     }
 
     //Add this chunk's hash to result so far:
