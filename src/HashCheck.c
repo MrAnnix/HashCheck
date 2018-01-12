@@ -215,9 +215,26 @@ int main(int argc, char **argv){
       return -1;
     }
   }
-  else if(!strcmp(argv[optind], "sha256")){
+  else if(!strcmp(argv[optind], "sha224")){
+    checksum_len = 28;
+    if(sha224_sum(msg, file_len, digest)){
+      if(msg != NULL){
+        free(msg);
+      }
+      return -1;
+    }
+  }else if(!strcmp(argv[optind], "sha256")){
     checksum_len = 32;
     if(sha256_sum(msg, file_len, digest)){
+      if(msg != NULL){
+        free(msg);
+      }
+      return -1;
+    }
+  }
+  else if(!strcmp(argv[optind], "sha384")){
+    checksum_len = 48;
+    if(sha384_sum(msg, file_len, digest)){
       if(msg != NULL){
         free(msg);
       }
