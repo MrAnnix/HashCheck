@@ -109,7 +109,7 @@ int sha1_sum(uint8_t *initial_msg, size_t initial_len, uint8_t *digest){
     int i;
     uint32_t temp;
     //break chunk into sixteen 32-bit words w[j], 0 ≤ j ≤ 15
-    uint32_t w[80];
+    uint32_t w[80] = {0};
     for(i = 0; i < 16; i++){
       w[i]  = msg[i * 4 + 0 + offset] << 24;
       w[i] |= msg[i * 4 + 1 + offset] << 16;
