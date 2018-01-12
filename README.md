@@ -7,4 +7,4 @@ For the moment:
 * sha-1
 * sha-2 (sha224, sha256, sha384 and sha512) 
 
-there will be more avaliable checksums soon.
+There will be more avaliable checksums soon.
