@@ -248,6 +248,10 @@ int main(int argc, char **argv){
       }
       return -1;
     }
+  }else{
+    printf("%s: %s: No valid command", argv[0], argv[optind]);
+    free(msg);
+    return -1;
   }
 
   int i;
