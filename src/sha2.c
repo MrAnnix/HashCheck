@@ -2,8 +2,8 @@
 
   File        sha2.c
 
-  Resume      Compute sha2 sum.
-              Based on Wikipedia example (https://en.wikipedia.org/wiki/SHA-2)
+  Resume      Compute the sha2 sums.
+              Based on Wikipedia examples (https://en.wikipedia.org/wiki/SHA-2)
 
   See also    HashCheck.h
 
@@ -33,10 +33,6 @@ SOFTWARE.
 
 #include <stdlib.h>
 #include <stdint.h>
-
-
-
-#include <stddef.h>
 #include <string.h>
 #include <byteswap.h>
 
