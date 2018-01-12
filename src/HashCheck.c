@@ -188,6 +188,9 @@ int main(int argc, char **argv){
         msg = realloc(msg, chars_readed + 1);
         msg[chars_readed - 1] = buff;
       }
+      if(chars_readed == 0){
+        msg = malloc(sizeof(uint8_t));
+      }
       msg[chars_readed] = '\0';
       file_len = chars_readed;
     }

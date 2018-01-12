@@ -69,19 +69,23 @@ SOFTWARE.
 
 #define LEFTROTATE(x, c) (((x) << (c)) | ((x) >> (32 - (c))))
 #define RIGHTROTATE(x,c) (((x) >> (c)) | ((x) << (32 - (c))))
+
 #define LEFTROTATE64(x, c) (((x) << (c)) | ((x) >> (64 - (c))))
 #define RIGHTROTATE64(x,c) (((x) >> (c)) | ((x) << (64 - (c))))
+
 #define CH(x,y,z) (((x) & (y)) ^ (~(x) & (z)))
 #define MAJ(x,y,z) (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
 
 #define EP0(x) (RIGHTROTATE(x, 2) ^ RIGHTROTATE(x,13) ^ RIGHTROTATE(x,22))
 #define EP1(x) (RIGHTROTATE(x, 6) ^ RIGHTROTATE(x,11) ^ RIGHTROTATE(x,25))
-#define SIG0(x) (RIGHTROTATE(x,7) ^ RIGHTROTATE(x,18) ^ ((x) >> 3))
+#define SIG0(x) (RIGHTROTATE(x, 7) ^ RIGHTROTATE(x,18) ^ ((x) >>  3))
 #define SIG1(x) (RIGHTROTATE(x,17) ^ RIGHTROTATE(x,19) ^ ((x) >> 10))
 
-#define EP0_512(x) (RIGHTROTATE64(x, 28) ^ RIGHTROTATE64(x,34) ^ RIGHTROTATE64(x,39))
-#define EP1_512(x) (RIGHTROTATE64(x, 14) ^ RIGHTROTATE64(x,18) ^ RIGHTROTATE64(x,41))
-#define SIG0_512(x) (RIGHTROTATE64(x,1) ^ RIGHTROTATE64(x,8) ^ ((x) >> 7))
+#define EP0_512(x) (RIGHTROTATE64(x, 28) ^ RIGHTROTATE64(x,34)\
+            ^ RIGHTROTATE64(x, 39))
+#define EP1_512(x) (RIGHTROTATE64(x, 14) ^ RIGHTROTATE64(x,18)\
+            ^ RIGHTROTATE64(x, 41))
+#define SIG0_512(x) (RIGHTROTATE64(x, 1) ^ RIGHTROTATE64(x, 8) ^ ((x) >> 7))
 #define SIG1_512(x) (RIGHTROTATE64(x,19) ^ RIGHTROTATE64(x,61) ^ ((x) >> 6))
 
 /*---------------------------------------------------------------------------*/
@@ -123,11 +127,11 @@ int sha256_sum(uint8_t *initial_msg, size_t initial_len, uint8_t *digest){
   uint8_t *msg = NULL;
 
   size_t new_len;
-  new_len = initial_len*8 + 1;
-  new_len += (512-((new_len+64)%512))%512;
+  new_len = initial_len*8 + 1 + sizeof(uint64_t)*8;
+  new_len += (512-((new_len)%512))%512;
   new_len /= 8;
 
-  msg = calloc(new_len + sizeof(uint64_t), sizeof(uint8_t));
+  msg = calloc(new_len, sizeof(uint8_t));
   if(msg == NULL){//calloc failed
     return -1;
   }
@@ -137,7 +141,7 @@ int sha256_sum(uint8_t *initial_msg, size_t initial_len, uint8_t *digest){
 
   //append original length in bits mod 2^64
   uint64_t bits_len = __bswap_64(8*initial_len);
-  memcpy(msg + new_len, &bits_len, sizeof(uint64_t));
+  memcpy(msg + new_len - sizeof(uint64_t), &bits_len, sizeof(uint64_t));
 
   //Process the message in successive 512-bit chunks:
   size_t offset;
@@ -283,11 +287,11 @@ int sha512_sum(uint8_t *initial_msg, size_t initial_len, uint8_t *digest){
   uint8_t *msg = NULL;
 
   size_t new_len;
-  new_len = initial_len*8 + 1;
-  new_len += (1024-((new_len+128)%1024))%1024;
+  new_len = initial_len*8 + 1 + sizeof(uint128_t)*8;
+  new_len += (1024-(new_len%1024))%1024;
   new_len /= 8;
 
-  msg = calloc(new_len + sizeof(uint128_t), sizeof(uint8_t));
+  msg = calloc(new_len, sizeof(uint8_t));
   if(msg == NULL){//calloc failed
     return -1;
   }
@@ -296,8 +300,8 @@ int sha512_sum(uint8_t *initial_msg, size_t initial_len, uint8_t *digest){
   msg[initial_len] = 0x80; // appending single bit to the message
 
   //append original length in bits mod 2^128
-  uint128_t bits_len = __bswap_128((8*(uint128_t)initial_len));
-  memcpy(msg + new_len, &bits_len, sizeof(uint128_t));
+  uint128_t bits_len = __bswap_128(8*(uint128_t)initial_len);
+  memcpy(msg + new_len - sizeof(uint128_t), &bits_len, sizeof(uint128_t));
 
   //Process the message in successive 1024-bit chunks:
   size_t offset;
@@ -309,19 +313,19 @@ int sha512_sum(uint8_t *initial_msg, size_t initial_len, uint8_t *digest){
     //break chunk into sixteen 64-bit words w[j], 0 ≤ j ≤ 15
     uint64_t w[80] = {0};
     for(i = 0; i < 16; i++){
-      w[i]  = (uint64_t)msg[i * 8 + 0 + offset] << 56;
-      w[i] |= (uint64_t)msg[i * 8 + 1 + offset] << 48;
-      w[i] |= (uint64_t)msg[i * 8 + 2 + offset] << 40;
-      w[i] |= (uint64_t)msg[i * 8 + 3 + offset] << 32;
-      w[i] |= (uint64_t)msg[i * 8 + 4 + offset] << 24;
-      w[i] |= (uint64_t)msg[i * 8 + 5 + offset] << 16;
-      w[i] |= (uint64_t)msg[i * 8 + 6 + offset] << 8;
-      w[i] |= (uint64_t)msg[i * 8 + 7 + offset];
+      w[i]  = (0xFFFFFFFFFFFFFFFF & msg[i * 8 + 0 + offset]) << 56;
+      w[i] |= (0xFFFFFFFFFFFFFFFF & msg[i * 8 + 1 + offset]) << 48;
+      w[i] |= (0xFFFFFFFFFFFFFFFF & msg[i * 8 + 2 + offset]) << 40;
+      w[i] |= (0xFFFFFFFFFFFFFFFF & msg[i * 8 + 3 + offset]) << 32;
+      w[i] |= (0xFFFFFFFFFFFFFFFF & msg[i * 8 + 4 + offset]) << 24;
+      w[i] |= (0xFFFFFFFFFFFFFFFF & msg[i * 8 + 5 + offset]) << 16;
+      w[i] |= (0xFFFFFFFFFFFFFFFF & msg[i * 8 + 6 + offset]) << 8;
+      w[i] |= (0xFFFFFFFFFFFFFFFF & msg[i * 8 + 7 + offset]);
     }
 
     //Extend the sixteen 64-bit words into eighty 64-bit words:
     for(i = 16 ; i< 80; i++){
-      w[i] += SIG1_512(w[i - 2]) + w[i - 7] + SIG0_512(w[i - 15] + w[i - 16]);
+      w[i] = SIG1_512(w[i - 2]) + w[i - 7] + SIG0_512(w[i - 15] + w[i - 16]);
     }
 
     // Initialize hash value for this chunk:
@@ -335,6 +339,7 @@ int sha512_sum(uint8_t *initial_msg, size_t initial_len, uint8_t *digest){
     uint64_t h = h7;
 
     //Main loop:
+    printf("\n              A/E              B/F              C/G              D/H \n");
     for(i = 0; i < 80; i++){
       t1 = h + EP1_512(e) + CH(e,f,g) + k[i] + w[i];
 		  t2 = EP0_512(a) + MAJ(a, b, c);
@@ -346,6 +351,9 @@ int sha512_sum(uint8_t *initial_msg, size_t initial_len, uint8_t *digest){
 		  c = b;
 		  b = a;
 		  a = t1 + t2;
+
+      printf("t = %2u: %016lX %016lX %016lX %016lX \n", i, a, b, c, d);
+      printf("        %016lX %016lX %016lX %016lX \n\n", e, f, g, h);
     }
 
     //Add this chunk's hash to result so far:
