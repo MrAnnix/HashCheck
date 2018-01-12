@@ -285,14 +285,19 @@ void print_help(char *program_name){
     printf("\t-h, --help           display this help and exit\n");
     printf("\t-v, --version        output version information and exit\n\n");
     printf("Options:\n");
-    printf("\tmd5                  Print or check MD5 (128-bit) checksums\n");
-    printf("\tsha1                 Print or check SHA1 (160-bit) checksums\n");
-    printf("\tsha256               Print or check SHA256 (256-bit) checksums\n");
-    printf("\tsha512               Print or check SHA512 (512-bit) checksums\n");
+    printf("\t-Message Digest Algorithm:\n");
+    printf("\n\tmd5                  Print or check MD5 (128-bit) checksums\n");
+    printf("\n\t-Secure Hash Algorithm 1:\n");
+    printf("\n\tsha1                 Print or check SHA-1 (160-bit) checksums\n");
+    printf("\n\t-Secure Hash Algorithm 2:\n");
+    printf("\n\tsha224               Print or check SHA-224 checksums\n");
+    printf("\tsha256               Print or check SHA-256 checksums\n");
+    printf("\tsha384               Print or check SHA-384 checksums\n");
+    printf("\tsha512               Print or check SHA-512 checksums\n");
 }
 
 void print_version(){
-  printf("HashCheck v0.1.1 ");
+  printf("HashCheck v0.1.4 ");
   printf("https://github.com/MrAnnix/HashCheck\n\n");
   printf("Copyright (c) 2018 Raúl San Martín Aniceto.\n");
   printf("MIT License\n");
